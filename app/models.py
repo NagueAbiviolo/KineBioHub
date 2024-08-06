@@ -22,7 +22,7 @@ class Topico(models.Model):
 class Pessoa(models.Model):
     ocupacao = models.ForeignKey(Ocupacao, on_delete=models.CASCADE)
     nome = models.CharField(max_length=100)
-    idade = models.IntegerField()
+    datanasc = models.DateField()
     Masculino = "Masc"
     Feminino = "Fem"
     Outro = "Outro"
@@ -57,16 +57,18 @@ class Questionario(models.Model):
         verbose_name_plural = "Questionários"
     def __str__(self):
         return self.nome
-class Pergunta(models.Model):
-    questionario = models.ForeignKey(Questionario, on_delete=models.CASCADE)
-    enunciado = models.CharField()
-    class Meta:
-        verbose_name_plural = "Perguntas"
-    def __str__(self):
-        return self.enunciado
 class Alternativa(models.Model):
     enunciado = models.CharField()
     class Meta:
         verbose_name_plural = "Alternativas"
     def __str__(self):
-        return self.enunciado                             
+        return self.enunciado    
+class Pergunta(models.Model):
+    questionario = models.ForeignKey(Questionario, on_delete=models.CASCADE)
+    enunciado = models.CharField()
+    alternativas = models.ManyToManyField(Alternativa)
+    alternativa_correta = models.ForeignKey(Alternativa, on_delete=models.CASCADE)
+    class Meta:
+        verbose_name_plural = "Perguntas"
+    def __str__(self):
+        return self.enunciado                            
