@@ -12,6 +12,6 @@ class RegisterForm(UserCreationForm):
         fields = ["email", "password1", "password2"]
 
 
-class LoginForm(forms.Form):
+class LoginForm(AuthenticationForm):
     email = forms.EmailField(label="Email", max_length=254)
     password = forms.CharField(label="Senha", widget=forms.PasswordInput)

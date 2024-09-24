@@ -32,7 +32,7 @@ class LoginView(AuthLoginView):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
-        super(LoginForm, self).__init__(*args, **kwargs)
+        super(LoginView, self).__init__(*args, **kwargs)
 
     def form_valid(self, form):
         email = form.cleaned_data["email"]
