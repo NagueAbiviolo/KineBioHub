@@ -1,5 +1,23 @@
 from django.db import models
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
+
+class PessoaManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields):
+        if not email:
+            raise ValueError("O email deve ser fornecido")
+        email = self.normalize_email(email)
+        user = self.model(email=email, **extra_fields)
+        user.set_password(password)  # Armazena a senha como hash
+        user.save(using=self._db)
+        return user
+
+    def create_superuser(self, email, password=None, **extra_fields):
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
+
+        return self.create_user(email, password, **extra_fields)
 
 
 class Ocupacao(models.Model):
@@ -33,11 +51,14 @@ class Topico(models.Model):
         return self.nome
 
 
-class Pessoa(models.Model):
-    ocupacao = models.ForeignKey('Ocupacao', on_delete=models.CASCADE)
-    email = models.EmailField(max_length=50)
-    datanasc = models.DateField()
-    
+class Pessoa(AbstractBaseUser):
+    email = models.EmailField(max_length=50, unique=True)
+    password = models.CharField(max_length=128)
+    ocupacao = models.ForeignKey(
+        "Ocupacao", on_delete=models.CASCADE, null=True, blank=True
+    )
+    datanasc = models.DateField(null=True, blank=True)
+
     Masculino = "Masc"
     Feminino = "Fem"
     Outro = "Outro"
@@ -46,15 +67,33 @@ class Pessoa(models.Model):
         (Feminino, "Feminino"),
         (Outro, "Outro"),
     ]
-    genero = models.CharField(max_length=5, choices=GEN_CHOICES)
-    
-    telefone = models.CharField(max_length=30)
+    genero = models.CharField(max_length=5, choices=GEN_CHOICES, null=True, blank=True)
+    telefone = models.CharField(max_length=30, null=True, blank=True)
+
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
+
+    last_login = models.DateTimeField(null=True, blank=True)
+
+    # Define o manager customizado
+    objects = PessoaManager()
+
+    # Define que o login será feito com email
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    def save(self, *args, **kwargs):
+        # Hash a senha antes de salvar
+        if self.password:
+            self.password = make_password(self.password)
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = "Pessoas"
 
     def __str__(self):
-        return self.user.username
+        return self.email
 
 
 class Conteudo(models.Model):
