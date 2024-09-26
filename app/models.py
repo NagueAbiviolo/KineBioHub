@@ -1,6 +1,12 @@
 from django.db import models
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+    Group,
+    Permission
+)
 
 
 class PessoaManager(BaseUserManager):
@@ -51,7 +57,7 @@ class Topico(models.Model):
         return self.nome
 
 
-class Pessoa(AbstractBaseUser):
+class Pessoa(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(max_length=50, unique=True)
     password = models.CharField(max_length=128)
     ocupacao = models.ForeignKey(
@@ -82,6 +88,23 @@ class Pessoa(AbstractBaseUser):
     # Define que o login será feito com email
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
+    groups = models.ManyToManyField(
+        Group,
+        verbose_name=("groups"),
+        blank=True,
+        help_text=(
+            "The groups this user belongs to. A user will get all permissions granted to each of their groups."
+        ),
+        related_name="pessoa_set",
+        related_query_name="pessoa",
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        verbose_name=("user permissions"),
+        blank=True,
+        help_text=("Specific permissions for this user."),
+        related_name="pessoa_set",
+    )
 
     def save(self, *args, **kwargs):
         # Hash a senha antes de salvar

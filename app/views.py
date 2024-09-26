@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect
 from .models import *
 from django.views import View
-from django.contrib.auth import login
+from django.contrib.auth import login, authenticate
 from .forms import RegisterForm, LoginForm
 from django.contrib.auth.views import LoginView as AuthLoginView
-
-
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 class IndexView(View):
     def get(self, request, *args, **kwargs):
         return render(request, "index.html")
@@ -32,16 +32,16 @@ class LoginView(AuthLoginView):
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request", None)
-        super(LoginView, self).__init__(*args, **kwargs)
+        super(LoginForm, self).__init__(*args, **kwargs)
 
     def form_valid(self, form):
         email = form.cleaned_data["email"]
         password = form.cleaned_data["password"]
 
-        user = self.authenticate(self.request, username=email, password=password)
+        user = authenticate(username=email, password=password)
         if user is not None:
             login(self.request, user)
-            return super().form_valid(form)
+            return HttpResponseRedirect(reverse('index'))
         else:
             form.add_error(None, "Email ou senha inválidos.")
             return self.form_invalid(form)
