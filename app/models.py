@@ -9,23 +9,6 @@ from django.contrib.auth.models import (
 )
 
 
-class PessoaManager(BaseUserManager):
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError("O email deve ser fornecido")
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)  # Armazena a senha como hash
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_superuser", True)
-
-        return self.create_user(email, password, **extra_fields)
-
-
 class Ocupacao(models.Model):
     nome = models.CharField(max_length=30)
 
@@ -81,11 +64,6 @@ class Pessoa(AbstractBaseUser, PermissionsMixin):
     is_superuser = models.BooleanField(default=False)
 
     last_login = models.DateTimeField(null=True, blank=True)
-
-    # Define o manager customizado
-    objects = PessoaManager()
-
-    # Define que o login será feito com email
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
     groups = models.ManyToManyField(

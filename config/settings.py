@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-9o3*2mr0-6)v%a&a&5y@y&@#pe4@z8v!n-r+1sn-z9-qx!r6@u
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+LOGIN_URL = 'login'
 
 # Application definition
 
@@ -82,6 +82,7 @@ DATABASES = {
         'PASSWORD': '123456',
         'HOST': 'localhost',
         'PORT': '5432',
+        
     }
 }
 
@@ -130,6 +131,7 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTHENTICATION_BACKENDS = [
-    'app.backends.CustomAuthBackend',  # Substitua pelo caminho correto
+    'app.backends.EmailAuthBackend',  # Substitua pelo caminho correto
     'django.contrib.auth.backends.ModelBackend',  # Para manter a autenticação padrão, se necessário
 ]
+LOGOUT_REDIRECT_URL = 'templates/login'

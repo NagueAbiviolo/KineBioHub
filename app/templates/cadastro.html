@@ -1,14 +1,15 @@
 <html>
   <head> </head>
   <body>
-    <form action="{% url 'login'%}" method="POST">{% csrf_token %}
+    <form action="{% url 'cadastro'%}" method="POST">{% csrf_token %}
 
       <input type="text" placeholder="Username" name="username" />
       <br />
+      <input type="email" placeholder="Email" name="email" />
       <br />
       <input type="password" name="senha" />
       <br />
-      <input type="submit" value="Logar" />
+      <input type="submit" value="cadastrar" />
     </form>
   </body>
 </html>

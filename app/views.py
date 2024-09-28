@@ -1,11 +1,13 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from .models import *
 from django.views import View
-from django.contrib.auth import login, authenticate
-from .forms import RegisterForm, LoginForm
-from django.contrib.auth.views import LoginView as AuthLoginView
-from django.http import HttpResponseRedirect
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from django.contrib.auth import login as login_django
+from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 from django.urls import reverse
+
 class IndexView(View):
     def get(self, request, *args, **kwargs):
         return render(request, "index.html")
@@ -14,34 +16,34 @@ class IndexView(View):
         pass
 
 
-def register_view(request):
-    if request.method == "POST":
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect("index")
+def cadastro(request):
+    if request.method == "GET":
+        return render(request, 'cadastro.html')
     else:
-        form = RegisterForm()
-    return render(request, "register.html", {"form": form})
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        senha = request.POST.get('senha')
+        user = User.objects.filter(username=username).first()
+        if user:
+            return HttpResponse('Já existe um usuário com esse username')
+        user =  User.objects.create_user(username=username, email=email, password=senha)
+        user.save()
 
+        return HttpResponse('Usuário cadastrado com sucesso')
 
-class LoginView(AuthLoginView):
-    template_name = "login.html"
-    form_class = LoginForm
-
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request", None)
-        super(LoginForm, self).__init__(*args, **kwargs)
-
-    def form_valid(self, form):
-        email = form.cleaned_data["email"]
-        password = form.cleaned_data["password"]
-
-        user = authenticate(username=email, password=password)
-        if user is not None:
-            login(self.request, user)
-            return HttpResponseRedirect(reverse('index'))
-        else:
-            form.add_error(None, "Email ou senha inválidos.")
-            return self.form_invalid(form)
+def login(request):
+    if request.method == "GET":
+        return render(request, 'login.html')
+    else:
+        username = request.POST.get('username')
+        senha = request.POST.get('senha')
+    user = authenticate(username=username, password=senha)
+    if user:
+        login_django(request, user)
+        return HttpResponseRedirect(reverse('home/'))
+    else:
+        return HttpResponse('Usuário ou senha inválidos')        
+@login_required(login_url="/auth/login/")
+def home(request):
+    return render(request, 'home.html')
+    

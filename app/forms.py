@@ -1,8 +1,7 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import Pessoa
-
+from django.contrib.auth import authenticate
 
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
@@ -12,15 +11,14 @@ class RegisterForm(UserCreationForm):
         fields = ["email", "password1", "password2"]
 
 
-class LoginForm(AuthenticationForm):
-<<<<<<< HEAD
-    email = forms.EmailField(label='Email')
-    password = forms.CharField(widget=forms.PasswordInput, label='Senha')
+class LoginForm(forms.Form):
+    email = forms.EmailField(label='Email', max_length=50)
+    password = forms.CharField(label='Senha', widget=forms.PasswordInput)
 
-    def __init__(self, *args, **kwargs):
-        self.request = kwargs.pop("request", None)
-        super(LoginForm, self).__init__(*args, **kwargs)
-=======
-    email = forms.EmailField(label="Email", max_length=254)
-    password = forms.CharField(label="Senha", widget=forms.PasswordInput)
->>>>>>> 5c8965bd859e96575eed6184d308810fb4f113c1
+    def clean(self):
+        email = self.cleaned_data.get('email')
+        password = self.cleaned_data.get('password')
+        user = authenticate(email=email, password=password)
+        if user is None:
+            raise forms.ValidationError('Email ou senha inválidos.')
+        return self.cleaned_data
