@@ -124,14 +124,13 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(STATIC_URL, "static")
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "app/static/")
+    os.path.join(BASE_DIR, 'app', 'static')
 ]
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTHENTICATION_BACKENDS = [
-    'app.backends.EmailAuthBackend',  # Substitua pelo caminho correto
+AUTHENTICATION_BACKENDS = [ 
     'django.contrib.auth.backends.ModelBackend',  # Para manter a autenticação padrão, se necessário
 ]
 LOGOUT_REDIRECT_URL = 'templates/login'

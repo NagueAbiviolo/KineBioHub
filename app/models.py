@@ -1,22 +1,5 @@
 from django.db import models
-from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import (
-    AbstractBaseUser,
-    BaseUserManager,
-    PermissionsMixin,
-    Group,
-    Permission
-)
-
-
-class Ocupacao(models.Model):
-    nome = models.CharField(max_length=30)
-
-    class Meta:
-        verbose_name_plural = "Ocupações"
-
-    def __str__(self):
-        return self.nome
+from django.core.exceptions import ValidationError
 
 
 class Disciplina(models.Model):
@@ -40,70 +23,11 @@ class Topico(models.Model):
         return self.nome
 
 
-class Pessoa(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(max_length=50, unique=True)
-    password = models.CharField(max_length=128)
-    ocupacao = models.ForeignKey(
-        "Ocupacao", on_delete=models.CASCADE, null=True, blank=True
-    )
-    datanasc = models.DateField(null=True, blank=True)
-
-    Masculino = "Masc"
-    Feminino = "Fem"
-    Outro = "Outro"
-    GEN_CHOICES = [
-        (Masculino, "Masculino"),
-        (Feminino, "Feminino"),
-        (Outro, "Outro"),
-    ]
-    genero = models.CharField(max_length=5, choices=GEN_CHOICES, null=True, blank=True)
-    telefone = models.CharField(max_length=30, null=True, blank=True)
-
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
-
-    last_login = models.DateTimeField(null=True, blank=True)
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
-    groups = models.ManyToManyField(
-        Group,
-        verbose_name=("groups"),
-        blank=True,
-        help_text=(
-            "The groups this user belongs to. A user will get all permissions granted to each of their groups."
-        ),
-        related_name="pessoa_set",
-        related_query_name="pessoa",
-    )
-    user_permissions = models.ManyToManyField(
-        Permission,
-        verbose_name=("user permissions"),
-        blank=True,
-        help_text=("Specific permissions for this user."),
-        related_name="pessoa_set",
-    )
-
-    def save(self, *args, **kwargs):
-        # Hash a senha antes de salvar
-        if self.password:
-            self.password = make_password(self.password)
-        super().save(*args, **kwargs)
-
-    class Meta:
-        verbose_name_plural = "Pessoas"
-
-    def __str__(self):
-        return self.email
-
-
 class Conteudo(models.Model):
     topico = models.ForeignKey(Topico, on_delete=models.CASCADE)
     titulo = models.CharField(max_length=100)
-    descricao = models.CharField(max_length=1000)
-    imagens = models.ImageField(
-        upload_to="imagens/"
-    )  # Ajuste o caminho para o upload de imagens
+    descricao = models.TextField()  
+    imagens = models.ImageField(upload_to="imagens/", blank=True, null=True)  
 
     class Meta:
         verbose_name_plural = "Conteúdos"
@@ -124,7 +48,7 @@ class Questionario(models.Model):
 
 
 class Alternativa(models.Model):
-    enunciado = models.CharField(max_length=1000)
+    enunciado = models.TextField()  
 
     class Meta:
         verbose_name_plural = "Alternativas"
@@ -135,7 +59,7 @@ class Alternativa(models.Model):
 
 class Pergunta(models.Model):
     questionario = models.ForeignKey(Questionario, on_delete=models.CASCADE)
-    enunciado = models.CharField(max_length=1000)
+    enunciado = models.TextField()  
     alternativas = models.ManyToManyField(Alternativa, related_name="perguntas")
     alternativa_correta = models.ForeignKey(
         Alternativa, related_name="corretas", on_delete=models.CASCADE
@@ -146,3 +70,11 @@ class Pergunta(models.Model):
 
     def __str__(self):
         return self.enunciado
+
+    def clean(self):
+        if self.alternativa_correta not in self.alternativas.all():
+            raise ValidationError("A alternativa correta não está entre as alternativas fornecidas.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super(Pergunta, self).save(*args, **kwargs)

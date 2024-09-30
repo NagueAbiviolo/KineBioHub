@@ -1,15 +1,125 @@
-<html>
-  <head> </head>
-  <body>
-    <form action="{% url 'cadastro'%}" method="POST">{% csrf_token %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KineBioHub - Cadastro</title>
+    <style>
+      /* Reset básico */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
 
-      <input type="text" placeholder="Username" name="username" />
-      <br />
-      <input type="email" placeholder="Email" name="email" />
-      <br />
-      <input type="password" name="senha" />
-      <br />
-      <input type="submit" value="cadastrar" />
-    </form>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #ffb6c1 10%, #ff69b4 100%);
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .cadastro-container {
+        background-color: rgba(255, 255, 255, 0.95);
+        padding: 40px 30px;
+        border-radius: 10px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+        width: 100%;
+        max-width: 400px;
+        text-align: center;
+      }
+
+      .cadastro-container h2 {
+        margin-bottom: 20px;
+        color: #333;
+      }
+
+      .cadastro-container form {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .cadastro-container input[type="text"],
+      .cadastro-container input[type="email"],
+      .cadastro-container input[type="password"] {
+        padding: 12px 15px;
+        margin: 10px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        transition: border 0.3s;
+        font-size: 1em;
+      }
+
+      .cadastro-container input[type="text"]:focus,
+      .cadastro-container input[type="email"]:focus,
+      .cadastro-container input[type="password"]:focus {
+        border-color: #ff69b4;
+        outline: none;
+      }
+
+      .cadastro-container input[type="submit"] {
+        padding: 12px 15px;
+        margin-top: 20px;
+        background-color: #ff69b4;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 1em;
+        transition: background-color 0.3s, transform 0.3s;
+      }
+
+      .cadastro-container input[type="submit"]:hover {
+        background-color: #ff1493;
+        transform: translateY(-2px);
+      }
+
+      .cadastro-container .login-link {
+        margin-top: 15px;
+        font-size: 0.9em;
+        color: #555;
+      }
+
+      .cadastro-container .login-link a {
+        color: #ff69b4;
+        text-decoration: none;
+        font-weight: bold;
+        transition: color 0.3s;
+      }
+
+      .cadastro-container .login-link a:hover {
+        color: #c71585;
+        text-decoration: underline;
+      }
+
+      /* Responsividade */
+      @media (max-width: 500px) {
+        .cadastro-container {
+          padding: 30px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cadastro-container">
+      <h2>Cadastro no KineBioHub</h2>
+      <form action="{% url 'cadastro' %}" method="POST">
+        {% csrf_token %}
+        <input
+          type="text"
+          placeholder="Nome de Usuário"
+          name="username"
+          required
+        />
+        <input type="email" placeholder="Email" name="email" required />
+        <input type="password" placeholder="Senha" name="senha" required />
+        <input type="submit" value="Cadastrar" />
+      </form>
+      <div class="login-link">
+        Já possui uma conta? <a href="{% url 'login' %}">Faça login aqui</a>
+      </div>
+    </div>
   </body>
 </html>

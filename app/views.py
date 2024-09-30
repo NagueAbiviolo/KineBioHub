@@ -4,6 +4,7 @@ from django.views import View
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
 from django.contrib.auth import login as login_django
+from django.contrib.auth import logout as logout_django
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
@@ -40,9 +41,12 @@ def login(request):
     user = authenticate(username=username, password=senha)
     if user:
         login_django(request, user)
-        return HttpResponseRedirect(reverse('home/'))
+        return HttpResponseRedirect(reverse('home'))
     else:
-        return HttpResponse('Usuário ou senha inválidos')        
+        return HttpResponse('Usuário ou senha inválidos')
+def logout(request):
+    logout_django(request)
+    return HttpResponseRedirect(reverse('index'))            
 @login_required(login_url="/auth/login/")
 def home(request):
     return render(request, 'home.html')
