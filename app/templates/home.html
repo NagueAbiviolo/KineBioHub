@@ -237,6 +237,37 @@
     </style>
   </head>
   <body>
+    {% if user.is_staff %}
+    <header>
+      <div class="header-left">
+        <div class="logo">KineBioHub</div>
+        <div class="profile-link">
+          <a href="#perfil"><i class="fas fa-user profile-icon"></i></a>
+        </div>
+      </div>
+      <nav>
+        <ul>
+          <li>
+            <a href="#">Ações</a>
+            <div class="submenu">
+              <a href="{% url 'add_conteudo'%}">Adicionar Conteúdo</a>
+              <a href="{% url 'add_questionario'%}">Adicionar Questionário</a>
+            </div>
+          </li>
+          <li><a href="#contato">Contato</a></li>
+        </ul>
+      </nav>
+      <div class="header-right">
+        <button class="theme-toggle" onclick="toggleTheme()">
+          <i class="fas fa-moon"></i>
+        </button>
+        <div class="logout-link">
+          <a href="{% url 'logout' %}">Sair</a>
+        </div>
+      </div>
+    </header>
+    {%endif%}
+    {%if not user.is_staff%}
     <header>
       <div class="header-left">
         <div class="logo">KineBioHub</div>
@@ -254,11 +285,7 @@
               <a href="#">Biomecânica</a>
               <a href="#">Controle Motor</a>
               <a href="#">Cinesiologia Clínica</a>
-              <a href="#">Cinesiologia do Desenvolvimento</a>
               <a href="#">Análise do Movimento</a>
-              <a href="#">Condicionamento Físico</a>
-              <a href="#">Ergonomia</a>
-              <a href="#">Psicologia do Movimento</a>
             </div>
           </li>
           <li><a href="#contato">Contato</a></li>
@@ -273,6 +300,7 @@
         </div>
       </div>
     </header>
+    {%endif%}
     <main>
       <section id="sobre">
         <h2>Sobre a Cinesiologia e Biomecânica</h2>

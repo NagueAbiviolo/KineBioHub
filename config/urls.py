@@ -9,5 +9,5 @@ from app import views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", IndexView.as_view(), name="index"),
-   path('auth/', include('app.urls'))
+    path('auth/', include('app.urls'))
 ]

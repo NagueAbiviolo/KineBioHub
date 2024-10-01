@@ -12,20 +12,8 @@ class Disciplina(models.Model):
         return self.nome
 
 
-class Topico(models.Model):
-    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE)
-    nome = models.CharField(max_length=30)
-
-    class Meta:
-        verbose_name_plural = "Tópicos"
-
-    def __str__(self):
-        return self.nome
-
-
 class Conteudo(models.Model):
-    topico = models.ForeignKey(Topico, on_delete=models.CASCADE)
-    titulo = models.CharField(max_length=100)
+    titulo = models.CharField(max_length=100, null=True)
     descricao = models.TextField()  
     imagens = models.ImageField(upload_to="imagens/", blank=True, null=True)  
 
