@@ -13,15 +13,16 @@ class Disciplina(models.Model):
 
 
 class Conteudo(models.Model):
-    titulo = models.CharField(max_length=100, null=True)
-    descricao = models.TextField()  
-    imagens = models.ImageField(upload_to="imagens/", blank=True, null=True)  
+    disciplina = models.ForeignKey(Disciplina, on_delete=models.CASCADE, null=True)
+    titulo = models.CharField(max_length=100)
+    descricao = models.TextField()
+    imagens = models.ImageField(upload_to="imagens/", blank=True, null=True)
 
     class Meta:
         verbose_name_plural = "Conteúdos"
 
     def __str__(self):
-        return self.titulo
+        return self.titulo if self.titulo else "Titulo desconhecido"
 
 
 class Questionario(models.Model):
@@ -34,9 +35,18 @@ class Questionario(models.Model):
     def __str__(self):
         return self.nome
 
+    def add_pergunta(self, enunciado, alternativas, alternativa_correta):
+        pergunta = Pergunta.objects.create(
+            questionario=self,
+            enunciado=enunciado,
+            alternativa_correta=alternativa_correta,
+        )
+        pergunta.alternativas.set(alternativas)
+        return pergunta
+
 
 class Alternativa(models.Model):
-    enunciado = models.TextField()  
+    enunciado = models.TextField()
 
     class Meta:
         verbose_name_plural = "Alternativas"
@@ -47,7 +57,7 @@ class Alternativa(models.Model):
 
 class Pergunta(models.Model):
     questionario = models.ForeignKey(Questionario, on_delete=models.CASCADE)
-    enunciado = models.TextField()  
+    enunciado = models.TextField()
     alternativas = models.ManyToManyField(Alternativa, related_name="perguntas")
     alternativa_correta = models.ForeignKey(
         Alternativa, related_name="corretas", on_delete=models.CASCADE
@@ -61,7 +71,9 @@ class Pergunta(models.Model):
 
     def clean(self):
         if self.alternativa_correta not in self.alternativas.all():
-            raise ValidationError("A alternativa correta não está entre as alternativas fornecidas.")
+            raise ValidationError(
+                "A alternativa correta não está entre as alternativas fornecidas."
+            )
 
     def save(self, *args, **kwargs):
         self.clean()

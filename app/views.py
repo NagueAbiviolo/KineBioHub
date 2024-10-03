@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .models import *
 from django.views import View
 from django.contrib.auth.models import User
@@ -17,37 +17,75 @@ class IndexView(View):
     def post(self, request):
         pass
 
+
+@login_required(login_url="/auth/login/")
 @login_required(login_url="/auth/login/")
 def add_conteudo(request):
     if request.method == "GET":
-        return render(request, "add_conteudo.html")
+        disciplinas = Disciplina.objects.all()
+        return render(request, "add_conteudo.html", {"disciplinas": disciplinas})
     else:
+        disciplina_id = request.POST.get("disciplina")
         titulo = request.POST.get("titulo")
         descricao = request.POST.get("descricao")
-        imagens = request.POST.get("imagens")
+        imagens = request.FILES.get("imagens")  # Captura o arquivo enviado
+
         conteudo = Conteudo.objects.filter(titulo=titulo).first()
         if conteudo:
-            return HttpResponse("Já existe um conteudo com esse título")
-        conteudo=Conteudo.objects.create(titulo=titulo, descricao=descricao, imagens=imagens)
-        conteudo.save()
-        return HttpResponse("Foi")    
+            return HttpResponse("Já existe um conteúdo com esse título")
+        disciplina = get_object_or_404(Disciplina, id=disciplina_id)
+        conteudo = Conteudo.objects.create(
+            disciplina=disciplina, titulo=titulo, descricao=descricao, imagens=imagens
+        )
+        return HttpResponse("Conteúdo criado com sucesso")
+
+
 @login_required(login_url="/auth/login/")
 def add_questionario(request):
-    
     if request.method == "GET":
         conteudos = Conteudo.objects.all()
-        return render(request, "add_questionario.html",  {'conteudos': conteudos})
-    
+        return render(request, "add_questionario.html", {"conteudos": conteudos})
+
     else:
-        conteudo = request.POST.get("conteudo")
-        nome =  request.POST.get("nome")
-        questionario = Questionario.objects.filter(nome=nome).first()
-        if questionario:
-            return HttpResponse("Já existe um questionario com esse nome")
+        conteudo_id = request.POST.get("conteudo")
+        nome = request.POST.get("nome")
+        enunciado = request.POST.get("enunciado")
+        alternativas = [
+            request.POST.get("alternativa_1"),
+            request.POST.get("alternativa_2"),
+            request.POST.get("alternativa_3"),
+            request.POST.get("alternativa_4"),
+        ]
+        alternativa_correta_index = int(request.POST.get("alternativa_correta")) - 1
+
+        # Verifique se já existe um questionário com esse nome
+        if Questionario.objects.filter(nome=nome).exists():
+            return HttpResponse("Já existe um questionário com esse nome")
+
+        conteudo = get_object_or_404(Conteudo, id=conteudo_id)
+
+        # Crie o questionário
         questionario = Questionario.objects.create(conteudo=conteudo, nome=nome)
-        questionario.save()
-        return HttpResponse("Foi")        
-        
+
+        # Crie as alternativas
+        alternativas_obj = []
+        for alternativa in alternativas:
+            alt = Alternativa.objects.create(enunciado=alternativa)
+            alternativas_obj.append(alt)
+
+        # Crie a pergunta
+        pergunta = Pergunta.objects.create(
+            questionario=questionario,
+            enunciado=enunciado,
+            alternativa_correta=alternativas_obj[alternativa_correta_index]
+        )
+
+        # Associe as alternativas à pergunta
+        pergunta.alternativas.set(alternativas_obj)
+
+        return HttpResponse("Questionário criado com sucesso com a pergunta.")
+
+
 
 def cadastro(request):
     if request.method == "GET":
