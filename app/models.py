@@ -35,15 +35,6 @@ class Questionario(models.Model):
     def __str__(self):
         return self.nome
 
-    def add_pergunta(self, enunciado, alternativas, alternativa_correta):
-        pergunta = Pergunta.objects.create(
-            questionario=self,
-            enunciado=enunciado,
-            alternativa_correta=alternativa_correta,
-        )
-        pergunta.alternativas.set(alternativas)
-        return pergunta
-
 
 class Alternativa(models.Model):
     enunciado = models.TextField()
@@ -60,7 +51,11 @@ class Pergunta(models.Model):
     enunciado = models.TextField()
     alternativas = models.ManyToManyField(Alternativa, related_name="perguntas")
     alternativa_correta = models.ForeignKey(
-        Alternativa, related_name="corretas", on_delete=models.CASCADE
+        Alternativa,
+        related_name="corretas",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
 
     class Meta:
@@ -70,9 +65,12 @@ class Pergunta(models.Model):
         return self.enunciado
 
     def clean(self):
-        if self.alternativa_correta not in self.alternativas.all():
+        if (
+            self.alternativa_correta
+            and self.alternativa_correta not in self.alternativas.all()
+        ):
             raise ValidationError(
-                "A alternativa correta não está entre as alternativas fornecidas."
+                "A alternativa correta deve estar entre as alternativas fornecidas."
             )
 
     def save(self, *args, **kwargs):

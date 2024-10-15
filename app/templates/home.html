@@ -266,8 +266,7 @@
         </div>
       </div>
     </header>
-    {%endif%}
-    {%if not user.is_staff%}
+    {%endif%} {%if not user.is_staff%}
     <header>
       <div class="header-left">
         <div class="logo">KineBioHub</div>
@@ -280,12 +279,14 @@
           <li>
             <a href="#conteudos">Conteúdos</a>
             <div class="submenu">
-              <a href="#">Anatomia Funcional</a>
-              <a href="#">Fisiologia do Exercício</a>
-              <a href="#">Biomecânica</a>
-              <a href="#">Controle Motor</a>
-              <a href="#">Cinesiologia Clínica</a>
-              <a href="#">Análise do Movimento</a>
+              <a href="{% url 'anatomia_funcional'%}">Anatomia Funcional</a>
+              <a href="{% url 'fisiologia_exercicio'%}"
+                >Fisiologia do Exercício</a
+              >
+              <a href="{% url 'biomecanica'%}">Biomecânica</a>
+              <a href="{% url 'controle_motor'%}">Controle Motor</a>
+              <a href="{% url 'cinesiologia_clinica'%}">Cinesiologia Clínica</a>
+              <a href="{% url 'analise_movimento'%}">Análise do Movimento</a>
             </div>
           </li>
           <li><a href="#contato">Contato</a></li>
