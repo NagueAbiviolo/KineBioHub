@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import *
 from django.views import View
 from django.contrib.auth.models import User
@@ -18,7 +18,6 @@ class IndexView(View):
         pass
 
 
-@login_required(login_url="/auth/login/")
 @login_required(login_url="/auth/login/")
 def add_conteudo(request):
     if request.method == "GET":
@@ -42,49 +41,38 @@ def add_conteudo(request):
 
 @login_required(login_url="/auth/login/")
 def add_questionario(request):
-    if request.method == "GET":
-        conteudos = Conteudo.objects.all()
-        return render(request, "add_questionario.html", {"conteudos": conteudos})
-
-    else:
+    if request.method == "POST":
         conteudo_id = request.POST.get("conteudo")
-        nome = request.POST.get("nome")
-        enunciado = request.POST.get("enunciado")
-        alternativas = [
-            request.POST.get("alternativa_1"),
-            request.POST.get("alternativa_2"),
-            request.POST.get("alternativa_3"),
-            request.POST.get("alternativa_4"),
-        ]
-        alternativa_correta_index = int(request.POST.get("alternativa_correta")) - 1
+        nome_questionario = request.POST.get("nome")
 
-        # Verifique se já existe um questionário com esse nome
-        if Questionario.objects.filter(nome=nome).exists():
-            return HttpResponse("Já existe um questionário com esse nome")
-
-        conteudo = get_object_or_404(Conteudo, id=conteudo_id)
-
-        # Crie o questionário
-        questionario = Questionario.objects.create(conteudo=conteudo, nome=nome)
-
-        # Crie as alternativas
-        alternativas_obj = []
-        for alternativa in alternativas:
-            alt = Alternativa.objects.create(enunciado=alternativa)
-            alternativas_obj.append(alt)
-
-        # Crie a pergunta
-        pergunta = Pergunta.objects.create(
-            questionario=questionario,
-            enunciado=enunciado,
-            alternativa_correta=alternativas_obj[alternativa_correta_index]
+        conteudo = Conteudo.objects.get(id=conteudo_id)
+        questionario = Questionario.objects.create(
+            conteudo=conteudo, nome=nome_questionario
         )
 
-        # Associe as alternativas à pergunta
-        pergunta.alternativas.set(alternativas_obj)
+        # Criar perguntas e alternativas
+        for i in range(int(request.POST.get("numero_perguntas"))):
+            enunciado = request.POST.get(f"pergunta_{i}")
+            pergunta = Pergunta.objects.create(
+                questionario=questionario, enunciado=enunciado
+            )
 
-        return HttpResponse("Questionário criado com sucesso com a pergunta.")
+            # Criar alternativas
+            for j in range(4):  # Supondo 4 alternativas
+                enunciado_alt = request.POST.get(f"alternativa_{i}_{j}")
+                alternativa = Alternativa.objects.create(enunciado=enunciado_alt)
+                pergunta.alternativas.add(alternativa)
 
+                # Verifica se é a alternativa correta
+                if request.POST.get(f"correta_{i}") == str(j):
+                    pergunta.alternativa_correta = alternativa
+
+            pergunta.save()
+
+        return redirect("home")
+
+    conteudos = Conteudo.objects.all()
+    return render(request, "add_questionario.html", {"conteudos": conteudos})
 
 
 def cadastro(request):
@@ -125,3 +113,94 @@ def logout(request):
 @login_required(login_url="/auth/login/")
 def home(request):
     return render(request, "home.html")
+
+
+def anatomia_funcional(request):
+    disciplina = get_object_or_404(Disciplina, nome="Anatomia Funcional")
+    conteudos = Conteudo.objects.filter(disciplina=disciplina)
+    return render(request, "anatomia_funcional.html", {"conteudos": conteudos})
+
+
+def fisiologia_exercicio(request):
+    disciplina = get_object_or_404(Disciplina, nome="Fisiologia do Exercício")
+    conteudos = Conteudo.objects.filter(disciplina=disciplina)
+    return render(request, "fisiologia_exercicio.html", {"conteudos": conteudos})
+
+
+def biomecanica(request):
+    disciplina = get_object_or_404(Disciplina, nome="Biomecânica")
+    conteudos = Conteudo.objects.filter(disciplina=disciplina)
+    return render(request, "biomecanica.html", {"conteudos": conteudos})
+
+
+def controle_motor(request):
+    disciplina = get_object_or_404(Disciplina, nome="Controle Motor")
+    conteudos = Conteudo.objects.filter(disciplina=disciplina)
+    return render(request, "controle_motor.html", {"conteudos": conteudos})
+
+
+def cinesiologia_clinica(request):
+    disciplina = get_object_or_404(Disciplina, nome="Cinesiologia Clínica")
+    conteudos = Conteudo.objects.filter(disciplina=disciplina)
+    return render(request, "cinesiologia_clinica.html", {"conteudos": conteudos})
+
+
+def analise_movimento(request):
+    disciplina = get_object_or_404(Disciplina, nome="Análise do Movimento")
+    conteudos = Conteudo.objects.filter(disciplina=disciplina)
+    return render(request, "analise_movimento.html", {"conteudos": conteudos})
+
+
+def detalhe_conteudo(request, conteudo_id):
+    conteudo = get_object_or_404(Conteudo, id=conteudo_id)
+    questionarios = Questionario.objects.filter(conteudo=conteudo)
+
+    return render(
+        request,
+        "detalhe_conteudo.html",
+        {"conteudo": conteudo, "questionarios": questionarios},
+    )
+
+
+from django.shortcuts import render, get_object_or_404
+from .models import Questionario, Pergunta, Alternativa
+
+
+@login_required(login_url="/auth/login/")
+def realizar_questionario(request, questionario_id):
+    questionario = get_object_or_404(Questionario, id=questionario_id)
+    perguntas = Pergunta.objects.filter(questionario=questionario)
+
+    if request.method == "POST":
+        corretas = 0
+        total = perguntas.count()
+
+        for pergunta in perguntas:
+            resposta_id = request.POST.get(f"resposta_{pergunta.id}")
+            if resposta_id:
+                resposta = get_object_or_404(Alternativa, id=resposta_id)
+                if resposta == pergunta.alternativa_correta:
+                    corretas += 1
+
+        # Calcular a pontuação
+        pontuacao = (corretas / total) * 100 if total > 0 else 0
+
+        # Retornar uma resposta com os resultados
+        return render(
+            request,
+            "resultado_questionario.html",
+            {
+                "pontuacao": pontuacao,
+                "total": total,
+                "corretas": corretas,
+            },
+        )
+
+    return render(
+        request,
+        "realizar_questionario.html",
+        {
+            "questionario": questionario,
+            "perguntas": perguntas,
+        },
+    )

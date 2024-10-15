@@ -1,88 +1,111 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Adicionar Questionário</title>
     <style>
-        /* Estilos para o formulário */
-        form {
-            display: flex;
-            flex-direction: column;
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        input[type="text"], select {
-            padding: 10px;
-            margin-bottom: 15px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        input[type="submit"] {
-            padding: 10px;
-            font-size: 18px;
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
+      .pergunta-container {
+        margin-bottom: 20px;
+        padding: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      .alternativa {
+        margin-left: 20px;
+      }
     </style>
-</head>
-<body>
-    <form action="{% url 'add_questionario' %}" method="POST">
-        {% csrf_token %}
-        <input type="text" name="nome" placeholder="Nome do Questionário" required>
-        
-        <select name="conteudo" required>
-            {% for conteudo in conteudos %}
-                <option value="{{ conteudo.id }}">{{ conteudo.titulo }}</option>
-            {% endfor %}
-        </select>
-    
-        <input type="text" name="enunciado" placeholder="Enunciado da Pergunta" required />
-        
-        <input type="text" name="alternativa_1" placeholder="Alternativa 1" required />
-        <input type="text" name="alternativa_2" placeholder="Alternativa 2" required />
-        <input type="text" name="alternativa_3" placeholder="Alternativa 3" required />
-        <input type="text" name="alternativa_4" placeholder="Alternativa 4" required />
-    
-        <select name="alternativa_correta" required>
-            <option value="1">Alternativa 1</option>
-            <option value="2">Alternativa 2</option>
-            <option value="3">Alternativa 3</option>
-            <option value="4">Alternativa 4</option>
-        </select>
-    
-        <input type="submit" value="Criar Questionário" />
+  </head>
+  <body>
+    <h2>Adicionar Questionário</h2>
+    <form method="post">
+      {% csrf_token %}
+      <label for="conteudo">Conteúdo:</label>
+      <select name="conteudo" required>
+        <option value="">Selecione um conteúdo</option>
+        {% for conteudo in conteudos %}
+        <option value="{{ conteudo.id }}">{{ conteudo.titulo }}</option>
+        {% endfor %}
+      </select>
+      <br /><br />
+
+      <label for="nome">Nome do Questionário:</label>
+      <input type="text" name="nome" required />
+      <br /><br />
+
+      <label for="numero_perguntas">Número de Perguntas:</label>
+      <input
+        type="number"
+        id="numero_perguntas"
+        name="numero_perguntas"
+        min="1"
+        max="10"
+        required
+      />
+      <button type="button" onclick="adicionarPerguntas()">
+        Adicionar Perguntas
+      </button>
+      <br /><br />
+
+      <div id="perguntas"></div>
+
+      <button type="submit">Adicionar Questionário</button>
     </form>
 
     <script>
-        function addPergunta() {
-            const container = document.getElementById('perguntas-container');
-            const novaPergunta = document.createElement('div');
-            novaPergunta.classList.add('pergunta');
-            novaPergunta.innerHTML = `
-                <input type="text" name="pergunta" placeholder="Enunciado da Pergunta" required>
-                <input type="text" name="alternativa" placeholder="Alternativas (separe por vírgula)" required>
-                <input type="text" name="alternativa_correta" placeholder="ID da Alternativa Correta" required>
-            `;
-            container.appendChild(novaPergunta);
+      function adicionarPerguntas() {
+        const numeroPerguntas =
+          document.getElementById("numero_perguntas").value;
+        const perguntasContainer = document.getElementById("perguntas");
+        perguntasContainer.innerHTML = ""; // Limpa as perguntas anteriores
+
+        for (let i = 0; i < numeroPerguntas; i++) {
+          const perguntaDiv = document.createElement("div");
+          perguntaDiv.classList.add("pergunta-container");
+
+          // Campo para enunciado da pergunta
+          const enunciadoLabel = document.createElement("label");
+          enunciadoLabel.textContent = `Pergunta ${i + 1}: `;
+          const enunciadoInput = document.createElement("input");
+          enunciadoInput.type = "text";
+          enunciadoInput.name = `pergunta_${i}`;
+          enunciadoInput.required = true;
+
+          perguntaDiv.appendChild(enunciadoLabel);
+          perguntaDiv.appendChild(enunciadoInput);
+          perguntaDiv.appendChild(document.createElement("br"));
+
+          // Campos para as alternativas
+          for (let j = 0; j < 4; j++) {
+            const alternativaDiv = document.createElement("div");
+            alternativaDiv.classList.add("alternativa");
+
+            const alternativaLabel = document.createElement("label");
+            alternativaLabel.textContent = `Alternativa ${j + 1}: `;
+            const alternativaInput = document.createElement("input");
+            alternativaInput.type = "text";
+            alternativaInput.name = `alternativa_${i}_${j}`;
+            alternativaInput.required = true;
+
+            const corretaInput = document.createElement("input");
+            corretaInput.type = "radio";
+            corretaInput.name = `correta_${i}`;
+            corretaInput.value = j;
+            corretaInput.required = true;
+
+            const corretaLabel = document.createElement("label");
+            corretaLabel.textContent = "Correta";
+
+            alternativaDiv.appendChild(alternativaLabel);
+            alternativaDiv.appendChild(alternativaInput);
+            alternativaDiv.appendChild(corretaInput);
+            alternativaDiv.appendChild(corretaLabel);
+            perguntaDiv.appendChild(alternativaDiv);
+          }
+
+          perguntasContainer.appendChild(perguntaDiv);
         }
+      }
     </script>
-</body>
+  </body>
 </html>
