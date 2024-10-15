@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Gerenciar Conteúdos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        a {
+            text-decoration: none;
+            color: #007BFF;
+            margin-right: 10px;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background: white;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Gerenciar Conteúdos</h1>
+    <a href="{% url 'add_conteudo' %}">Adicionar Conteúdo</a>
+    <ul>
+        {% for conteudo in conteudos %}
+            <li>
+                {{ conteudo.titulo }} - {{ conteudo.disciplina.nome }}
+                <a href="{% url 'editar_conteudo' conteudo.id %}">Editar</a>
+                <a href="{% url 'deletar_conteudo' conteudo.id %}" onclick="return confirm('Tem certeza que deseja deletar este conteúdo?');">Deletar</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

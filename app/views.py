@@ -8,6 +8,7 @@ from django.contrib.auth import logout as logout_django
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse
+from django.contrib import messages
 
 
 class IndexView(View):
@@ -16,6 +17,12 @@ class IndexView(View):
 
     def post(self, request):
         pass
+
+
+@login_required(login_url="/auth/login/")
+def gerenciar_conteudos(request):
+    conteudos = Conteudo.objects.all()
+    return render(request, "gerenciar_conteudos.html", {"conteudos": conteudos})
 
 
 @login_required(login_url="/auth/login/")
@@ -37,6 +44,42 @@ def add_conteudo(request):
             disciplina=disciplina, titulo=titulo, descricao=descricao, imagens=imagens
         )
         return HttpResponse("Conteúdo criado com sucesso")
+
+
+@login_required(login_url="/auth/login/")
+def editar_conteudo(request, conteudo_id):
+    conteudo = get_object_or_404(Conteudo, id=conteudo_id)
+
+    if request.method == "POST":
+        conteudo.titulo = request.POST.get("titulo")
+        conteudo.descricao = request.POST.get("descricao")
+
+        # Atualiza a disciplina apenas se uma nova disciplina for selecionada
+        disciplina_id = request.POST.get("disciplina")
+        if disciplina_id:
+            conteudo.disciplina = get_object_or_404(Disciplina, id=disciplina_id)
+
+        if request.FILES.get("imagens"):
+            conteudo.imagens = request.FILES.get("imagens")
+
+        conteudo.save()
+        messages.success(request, "Conteúdo atualizado com sucesso")
+        return redirect("gerenciar_conteudos")
+
+    disciplinas = Disciplina.objects.all()
+    return render(
+        request,
+        "editar_conteudo.html",
+        {"conteudo": conteudo, "disciplinas": disciplinas},
+    )
+
+
+@login_required(login_url="/auth/login/")
+def deletar_conteudo(request, conteudo_id):
+    conteudo = get_object_or_404(Conteudo, id=conteudo_id)
+    conteudo.delete()
+    messages.success(request, "Conteúdo deletado com sucesso")
+    return redirect("gerenciar_conteudos")
 
 
 @login_required(login_url="/auth/login/")
@@ -75,9 +118,103 @@ def add_questionario(request):
     return render(request, "add_questionario.html", {"conteudos": conteudos})
 
 
+@login_required(login_url="/auth/login/")
+def gerenciar_questionarios(request):
+    questionarios = Questionario.objects.all()
+
+    if request.method == "POST":
+        questionario_id = request.POST.get("delete")
+        if questionario_id:
+            questionario = get_object_or_404(Questionario, id=questionario_id)
+            questionario.delete()
+            return redirect("gerenciar_questionarios")
+
+    return render(
+        request, "gerenciar_questionarios.html", {"questionarios": questionarios}
+    )
+
+
+@login_required(login_url="/auth/login/")
+def editar_questionario(request, questionario_id):
+    questionario = get_object_or_404(Questionario, id=questionario_id)
+    perguntas = questionario.pergunta_set.all()  # Recupera as perguntas do questionário
+
+    if request.method == "POST":
+        nome = request.POST.get("nome")
+        conteudo_id = request.POST.get("conteudo")
+
+        # Atualiza o nome e o conteúdo do questionário
+        if nome and conteudo_id:
+            questionario.nome = nome
+            questionario.conteudo_id = conteudo_id
+            questionario.save()
+
+            # Atualiza as perguntas e alternativas
+            for i in range(len(perguntas)):
+                pergunta_id = request.POST.get(f"pergunta_id_{i}")
+                enunciado_pergunta = request.POST.get(f"pergunta_{i}")
+
+                # Atualiza a pergunta
+                pergunta = Pergunta.objects.get(id=pergunta_id)
+                pergunta.enunciado = enunciado_pergunta
+                pergunta.save()
+
+                # Atualiza as alternativas
+                for j in range(4):  # Supondo que sempre há 4 alternativas
+                    alternativa_id = request.POST.get(f"alternativa_id_{i}_{j}")
+                    enunciado_alternativa = request.POST.get(f"alternativa_{i}_{j}")
+
+                    # Se a alternativa já existe
+                    if alternativa_id:
+                        alternativa = Alternativa.objects.get(id=alternativa_id)
+                        if (
+                            enunciado_alternativa
+                        ):  # Verifica se o enunciado não está vazio
+                            alternativa.enunciado = enunciado_alternativa
+                            alternativa.save()
+                    else:  # Se não houver ID, cria uma nova alternativa
+                        if (
+                            enunciado_alternativa
+                        ):  # Verifica se o enunciado não está vazio
+                            alternativa = Alternativa.objects.create(
+                                enunciado=enunciado_alternativa
+                            )
+                            pergunta.alternativas.add(alternativa)
+
+                # Atualiza a alternativa correta
+                alternativa_correta_id = request.POST.get(f"correta_{i}")
+                if alternativa_correta_id:
+                    alternativa_correta = Alternativa.objects.get(
+                        id=alternativa_correta_id
+                    )
+                    pergunta.alternativa_correta = alternativa_correta
+                else:
+                    pergunta.alternativa_correta = (
+                        None  # Se não foi selecionada, limpa a correta
+                    )
+                pergunta.save()
+
+            return redirect("gerenciar_questionarios")
+
+        else:
+            messages.error(request, "Erro: Nome ou conteúdo não pode ser nulo")
+
+    conteudos = Conteudo.objects.all()
+    return render(
+        request,
+        "editar_questionario.html",
+        {
+            "questionario": questionario,
+            "conteudos": conteudos,
+            "perguntas": perguntas,
+        },
+    )
+
+
 def cadastro(request):
     if request.method == "GET":
         return render(request, "cadastro.html")
+
     else:
         username = request.POST.get("username")
         email = request.POST.get("email")
@@ -160,10 +297,6 @@ def detalhe_conteudo(request, conteudo_id):
         "detalhe_conteudo.html",
         {"conteudo": conteudo, "questionarios": questionarios},
     )
-
-
-from django.shortcuts import render, get_object_or_404
-from .models import Questionario, Pergunta, Alternativa
 
 
 @login_required(login_url="/auth/login/")

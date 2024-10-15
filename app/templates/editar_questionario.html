@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Questionário</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #eaeaea;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3 {
+            color: #4a4a4a;
+            border-bottom: 2px solid #4a90e2;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        input[type="text"], select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        input[type="text"]:focus, select:focus {
+            border-color: #4a90e2;
+            outline: none;
+        }
+        button {
+            background-color: #4a90e2;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #357ab8;
+        }
+        .alternativas {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f7f7f7;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+        }
+        .alternativa {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        .alternativa input[type="radio"] {
+            margin-right: 10px;
+        }
+        .alternativa input[type="text"] {
+            flex: 1;
+            margin-left: 10px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Editar Questionário: {{ questionario.nome }}</h1>
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="nome">Nome do Questionário:</label>
+                <input type="text" name="nome" id="nome" value="{{ questionario.nome }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="conteudo">Conteúdo:</label>
+                <select name="conteudo" id="conteudo">
+                    {% for conteudo in conteudos %}
+                        <option value="{{ conteudo.id }}" {% if conteudo.id == questionario.conteudo.id %}selected{% endif %}>
+                            {{ conteudo.titulo }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <h2>Perguntas</h2>
+            {% for pergunta in perguntas %}
+                <div class="pergunta">
+                    <input type="hidden" name="pergunta_id_{{ forloop.counter0 }}" value="{{ pergunta.id }}">
+                    <div class="form-group">
+                        <label for="pergunta_{{ forloop.counter0 }}">Pergunta {{ forloop.counter }}:</label>
+                        <input type="text" name="pergunta_{{ forloop.counter0 }}" id="pergunta_{{ forloop.counter0 }}" value="{{ pergunta.enunciado }}" required>
+                    </div>
+
+                    <div class="alternativas">
+                        <h3>Alternativas</h3>
+                        {% for alternativa in pergunta.alternativas.all %}
+                        <div class="alternativa">
+                            <input type="radio" name="correta_{{ forloop.parentloop.counter0 }}" value="{{ alternativa.id }}" {% if alternativa.id == pergunta.alternativa_correta.id %}checked{% endif %}>
+                            <input type="hidden" name="alternativa_id_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}" value="{{ alternativa.id }}">
+                            <input type="text" name="alternativa_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}" value="{{ alternativa.enunciado }}" required>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="form-group">
+                <button type="submit">Salvar Alterações</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const perguntas = document.querySelectorAll('.pergunta');
+
+            perguntas.forEach((pergunta, index) => {
+                const alternativas = pergunta.querySelectorAll('.alternativa');
+                const alternativaCorretaSelect = pergunta.querySelector('input[type="radio"]:checked');
+
+                alternativas.forEach((alternativa) => {
+                    const input = alternativa.querySelector('input[type="radio"]');
+                    if (input) {
+                        input.addEventListener('change', function() {
+                            // Atualiza a alternativa correta quando uma alternativa é selecionada
+                            alternativaCorretaSelect.value = input.value; // Atualiza o valor do select da alternativa correta
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
