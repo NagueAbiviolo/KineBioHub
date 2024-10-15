@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerenciar Questionários</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+      }
+      h2 {
+        color: #333;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        border: 1px solid #ddd;
+      }
+      th {
+        background-color: #f2f2f2;
+      }
+      button {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #c82333; /* Cor ao passar o mouse */
+      }
+      .edit-button {
+        background-color: #007bff;
+        margin-right: 5px;
+      }
+      .edit-button:hover {
+        background-color: #0069d9; /* Cor ao passar o mouse */
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Gerenciar Questionários</h2>
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Conteúdo</th>
+        <th>Ações</th>
+      </tr>
+      {% for questionario in questionarios %}
+      <tr>
+        <td>{{ questionario.id }}</td>
+        <td>{{ questionario.nome }}</td>
+        <td>{{ questionario.conteudo.titulo }}</td>
+        <td>
+          <form
+            method="post"
+            action="{% url 'editar_questionario' questionario.id %}"
+            style="display: inline"
+          >
+            {% csrf_token %}
+            <button type="submit" class="edit-button">Editar</button>
+          </form>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="delete" value="{{ questionario.id }}" />
+            <button type="submit">Excluir</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <br />
+    <a href="{% url 'add_questionario' %}">Adicionar Novo Questionário</a>
+  </body>
+</html>

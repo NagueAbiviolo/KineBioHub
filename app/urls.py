@@ -6,7 +6,18 @@ urlpatterns = [
     path("login/", views.login, name="login"),
     path("home/", views.home, name="home"),
     path("logout/", views.logout, name="logout"),
-    path("add_conteudo/", views.add_conteudo, name="add_conteudo"),
+    path("conteudos/", views.gerenciar_conteudos, name="gerenciar_conteudos"),
+    path("conteudos/add/", views.add_conteudo, name="add_conteudo"),
+    path(
+        "conteudos/editar/<int:conteudo_id>/",
+        views.editar_conteudo,
+        name="editar_conteudo",
+    ),
+    path(
+        "conteudos/deletar/<int:conteudo_id>/",
+        views.deletar_conteudo,
+        name="deletar_conteudo",
+    ),
     path("add_questionario/", views.add_questionario, name="add_questionario"),
     path("anatomia_funcional/", views.anatomia_funcional, name="anatomia_funcional"),
     path(
@@ -25,5 +36,15 @@ urlpatterns = [
         "questionario/<int:questionario_id>/",
         views.realizar_questionario,
         name="realizar_questionario",
+    ),
+    path(
+        "gerenciar_questionarios/",
+        views.gerenciar_questionarios,
+        name="gerenciar_questionarios",
+    ),
+    path(
+        "editar_questionario/<int:questionario_id>/",
+        views.editar_questionario,
+        name="editar_questionario",
     ),
 ]
