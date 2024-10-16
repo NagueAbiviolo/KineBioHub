@@ -6,10 +6,11 @@ from django.contrib.auth import authenticate
 from django.contrib.auth import login as login_django
 from django.contrib.auth import logout as logout_django
 from django.http import HttpResponse, HttpResponseRedirect
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.urls import reverse
 from django.contrib import messages
-
+from django.core.mail import send_mail
+from django.conf import settings
 
 class IndexView(View):
     def get(self, request, *args, **kwargs):
@@ -19,13 +20,13 @@ class IndexView(View):
         pass
 
 
-@login_required(login_url="/auth/login/")
+@user_passes_test(lambda user: user.is_staff, login_url="/auth/login/")
 def gerenciar_conteudos(request):
     conteudos = Conteudo.objects.all()
     return render(request, "gerenciar_conteudos.html", {"conteudos": conteudos})
 
 
-@login_required(login_url="/auth/login/")
+@user_passes_test(lambda user: user.is_staff, login_url="/auth/login/")
 def add_conteudo(request):
     if request.method == "GET":
         disciplinas = Disciplina.objects.all()
@@ -46,7 +47,7 @@ def add_conteudo(request):
         return HttpResponse("Conteúdo criado com sucesso")
 
 
-@login_required(login_url="/auth/login/")
+@user_passes_test(lambda user: user.is_staff, login_url="/auth/login/")
 def editar_conteudo(request, conteudo_id):
     conteudo = get_object_or_404(Conteudo, id=conteudo_id)
 
@@ -74,7 +75,7 @@ def editar_conteudo(request, conteudo_id):
     )
 
 
-@login_required(login_url="/auth/login/")
+@user_passes_test(lambda user: user.is_staff, login_url="/auth/login/")
 def deletar_conteudo(request, conteudo_id):
     conteudo = get_object_or_404(Conteudo, id=conteudo_id)
     conteudo.delete()
@@ -82,7 +83,7 @@ def deletar_conteudo(request, conteudo_id):
     return redirect("gerenciar_conteudos")
 
 
-@login_required(login_url="/auth/login/")
+@user_passes_test(lambda user: user.is_staff, login_url="/auth/login/")
 def add_questionario(request):
     if request.method == "POST":
         conteudo_id = request.POST.get("conteudo")
@@ -118,7 +119,7 @@ def add_questionario(request):
     return render(request, "add_questionario.html", {"conteudos": conteudos})
 
 
-@login_required(login_url="/auth/login/")
+@user_passes_test(lambda user: user.is_staff, login_url="/auth/login/")
 def gerenciar_questionarios(request):
     questionarios = Questionario.objects.all()
 
@@ -134,7 +135,7 @@ def gerenciar_questionarios(request):
     )
 
 
-@login_required(login_url="/auth/login/")
+@user_passes_test(lambda user: user.is_staff, login_url="/auth/login/")
 def editar_questionario(request, questionario_id):
     questionario = get_object_or_404(Questionario, id=questionario_id)
     perguntas = questionario.pergunta_set.all()  # Recupera as perguntas do questionário
@@ -337,3 +338,27 @@ def realizar_questionario(request, questionario_id):
             "perguntas": perguntas,
         },
     )
+
+
+def contato(request):
+    if request.method == "POST":
+        nome = request.POST.get("name")
+        email = request.POST.get("email")
+        mensagem = request.POST.get("message")
+
+        subject = f"Contato de {nome}"
+        message = f"Nome: {nome}\nE-mail: {email}\nMensagem:\n{mensagem}"
+
+        try:
+            send_mail(
+                subject, message, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER]
+            )
+            messages.success(request, "Mensagem enviada com sucesso!")
+        except Exception as e:
+            messages.error(
+                request, "Erro ao enviar a mensagem. Tente novamente mais tarde."
+            )
+
+        return redirect("contato")  # Redireciona após o envio
+
+    return render(request, "contato.html")

@@ -1,14 +1,19 @@
 {%load static%}
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>KineBioHub - Plataforma de Aprendizado em Cinesiologia e Biomecânica</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap">
+    <title>
+      KineBioHub - Plataforma de Aprendizado em Cinesiologia e Biomecânica
+    </title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap"
+    />
     <style>
       body {
-        font-family: 'Open Sans', sans-serif;
+        font-family: "Open Sans", sans-serif;
         margin: 0;
         padding: 0;
         background-color: #f0f0f0;
@@ -89,6 +94,7 @@
         width: 180px;
         height: auto;
         margin-bottom: 30px;
+        border-radius: 30px;
       }
 
       .about {
@@ -193,59 +199,64 @@
         color: #fff;
       }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <header>
-        <nav>
-            <ul>
-                <li><a href="#">Sobre</a></li>
-                <li><a href="#">Recursos</a></li>
-                <li><a href="#">Contato</a></li>
-            </ul>
-        </nav>
+      <nav>
+        <ul>
+          <li><a href="{% url 'contato' %}">Contato</a></li>
+        </ul>
+      </nav>
     </header>
 
     <main>
-        <section class="hero">
-            <img src="{% static "admin/img/logo.jpg" %}" alt="Logo da KineBioHub">
-            <h1>KineBioHub</h1>
-            <p>Plataforma de Aprendizado em Cinesiologia e Biomecânica</p>
-            <a href="{% url 'cadastro' %}">Comece agora</a>
-        </section>
+      <section class="hero">
+        <img src="{% static "admin/img/logo.jpg" %}" alt="Logo da KineBioHub">
+        <h1>KineBioHub</h1>
+        <p>Plataforma de Aprendizado em Cinesiologia e Biomecânica</p>
+        <a href="{% url 'cadastro' %}">Comece agora</a>
+      </section>
 
-        <section class="about">
-            <h2>Sobre a Plataforma</h2>
-            <p>A KineBioHub é uma plataforma de aprendizado online que oferece cursos e recursos para estudantes e profissionais da área de cinesiologia e biomecânica.</p>
-        </section>
+      <section class="about">
+        <h2>Sobre a Plataforma</h2>
+        <p>
+          A KineBioHub é uma plataforma de aprendizado online que oferece cursos
+          e recursos para estudantes e profissionais da área de cinesiologia e
+          biomecânica.
+        </p>
+      </section>
 
-        <section class="features">
-            <h2>Recursos</h2>
-            <div class="feature-grid">
-                <div class="feature-item">
-                    <img src="https://via.placeholder.com/100" alt="Imagem de recurso">
-                    <h3>Recurso 1</h3>
-                    <p>Descrição do recurso 1.</p>
-                </div>
-                <div class="feature-item">
-                    <img src="https://via.placeholder.com/100" alt="Imagem de recurso">
-                    <h3>Recurso 2</h3>
-                    <p>Descrição do recurso 2.</p>
-                </div>
-                <div class="feature-item">
-                    <img src="https://via.placeholder.com/100" alt="Imagem de recurso">
-                    <h3>Recurso 3</h3>
-                    <p>Descrição do recurso 3.</p>
-                </div>
-            </div>
-        </section>
+      <section class="features">
+        <h2>Recursos</h2>
+        <div class="feature-grid">
+          <div class="feature-item">
+            <img src="{% static "admin/img/questionario.jpg" %}" alt="Imagem de
+            Questionário">
+            <h3>Questionários</h3>
+            <p>
+              Teste seus conhecimentos com questionários interativos baseados em
+              cinesiologia e biomecânica
+            </p>
+          </div>
+          <div class="feature-item">
+            <img src="{% static "admin/img/cerebro.jpg" %}" alt="Imagem de Cérebro">
+            <h3>Diversidade de Conteúdos</h3>
+            <p>Acesse uma ampla variedade de materiais didáticos</p>
+          </div>
+          <div class="feature-item">
+            <img
+              src="{% static "admin/img/professor.jpg" %}"
+              alt="Imagem de Professor"
+            />
+            <h3>Para Estudantes e Professores</h3>
+            <p>Recursos personalizados para apoiar tanto estudantes quanto professores em suas jornadas educacionais</p>
+          </div>
+        </div>
+      </section>
     </main>
 
     <footer>
-        <p>&copy; 2024 KineBioHub. Todos os direitos reservados.</p>
-        <ul>
-            <li><a href="#">Termos de uso</a></li>
-            <li><a href="#">Política de privacidade</a></li>
-        </ul>
+      <p>&copy; 2024 KineBioHub. Todos os direitos reservados.</p>
     </footer>
-</body>
+  </body>
 </html>
