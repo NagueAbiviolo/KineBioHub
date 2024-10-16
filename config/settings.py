@@ -134,3 +134,9 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  # Para manter a autenticação padrão, se necessário
 ]
 LOGOUT_REDIRECT_URL = 'templates/login'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"  # ou o servidor de e-mail que você está usando
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "kinebiohub@gmail.com"  # seu e-mail
+EMAIL_HOST_PASSWORD = "htvq ddtv pjyv tfoy"  # sua senha de e-mail
