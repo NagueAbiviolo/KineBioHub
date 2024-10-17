@@ -1,46 +1,49 @@
 <!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{ questionario.nome }}</title>
     <style>
-        /* Estilos simples para o questionário */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            color: #333;
-            line-height: 1.6;
-            padding: 20px;
-        }
-        h1 {
-            color: #2c3e50;
-        }
-        .pergunta {
-            margin-bottom: 20px;
-            background-color: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-        }
+      /* Estilos simples para o questionário */
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f0f2f5;
+        color: #333;
+        line-height: 1.6;
+        padding: 20px;
+      }
+      h1 {
+        color: #2c3e50;
+      }
+      .pergunta {
+        margin-bottom: 20px;
+        background-color: #fff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>{{ questionario.nome }}</h1>
     <form method="post">
-        {% csrf_token %}
-        {% for pergunta in perguntas %}
-            <div class="pergunta">
-                <h3>{{ pergunta.enunciado }}</h3>
-                {% for alternativa in pergunta.alternativas.all %}
-                    <label>
-                        <input type="radio" name="resposta_{{ pergunta.id }}" value="{{ alternativa.id }}">
-                        {{ alternativa.enunciado }}
-                    </label><br>
-                {% endfor %}
-            </div>
+      {% csrf_token %} {% for pergunta in perguntas %}
+      <div class="pergunta">
+        <h3>{{ pergunta.enunciado }}</h3>
+        {% for alternativa in pergunta.alternativas.all %}
+        <label>
+          <input
+            type="radio"
+            name="resposta_{{ pergunta.id }}"
+            value="{{ alternativa.id }}"
+          />
+          {{ alternativa.enunciado }} </label
+        ><br />
         {% endfor %}
-        <button type="submit">Enviar Respostas</button>
+      </div>
+      {% endfor %}
+      <button type="submit">Enviar Respostas</button>
     </form>
-</body>
+  </body>
 </html>

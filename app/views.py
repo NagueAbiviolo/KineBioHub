@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
 
+
 class IndexView(View):
     def get(self, request, *args, **kwargs):
         return render(request, "index.html")
@@ -35,7 +36,7 @@ def add_conteudo(request):
         disciplina_id = request.POST.get("disciplina")
         titulo = request.POST.get("titulo")
         descricao = request.POST.get("descricao")
-        imagens = request.FILES.get("imagens")  # Captura o arquivo enviado
+        imagens = request.FILES.get("imagens")
 
         conteudo = Conteudo.objects.filter(titulo=titulo).first()
         if conteudo:
@@ -55,7 +56,6 @@ def editar_conteudo(request, conteudo_id):
         conteudo.titulo = request.POST.get("titulo")
         conteudo.descricao = request.POST.get("descricao")
 
-        # Atualiza a disciplina apenas se uma nova disciplina for selecionada
         disciplina_id = request.POST.get("disciplina")
         if disciplina_id:
             conteudo.disciplina = get_object_or_404(Disciplina, id=disciplina_id)
@@ -94,20 +94,17 @@ def add_questionario(request):
             conteudo=conteudo, nome=nome_questionario
         )
 
-        # Criar perguntas e alternativas
         for i in range(int(request.POST.get("numero_perguntas"))):
             enunciado = request.POST.get(f"pergunta_{i}")
             pergunta = Pergunta.objects.create(
                 questionario=questionario, enunciado=enunciado
             )
 
-            # Criar alternativas
-            for j in range(4):  # Supondo 4 alternativas
+            for j in range(4):
                 enunciado_alt = request.POST.get(f"alternativa_{i}_{j}")
                 alternativa = Alternativa.objects.create(enunciado=enunciado_alt)
                 pergunta.alternativas.add(alternativa)
 
-                # Verifica se é a alternativa correta
                 if request.POST.get(f"correta_{i}") == str(j):
                     pergunta.alternativa_correta = alternativa
 
@@ -138,51 +135,41 @@ def gerenciar_questionarios(request):
 @user_passes_test(lambda user: user.is_staff, login_url="/auth/login/")
 def editar_questionario(request, questionario_id):
     questionario = get_object_or_404(Questionario, id=questionario_id)
-    perguntas = questionario.pergunta_set.all()  # Recupera as perguntas do questionário
+    perguntas = questionario.pergunta_set.all()
 
     if request.method == "POST":
         nome = request.POST.get("nome")
         conteudo_id = request.POST.get("conteudo")
 
-        # Atualiza o nome e o conteúdo do questionário
         if nome and conteudo_id:
             questionario.nome = nome
             questionario.conteudo_id = conteudo_id
             questionario.save()
 
-            # Atualiza as perguntas e alternativas
             for i in range(len(perguntas)):
                 pergunta_id = request.POST.get(f"pergunta_id_{i}")
                 enunciado_pergunta = request.POST.get(f"pergunta_{i}")
 
-                # Atualiza a pergunta
                 pergunta = Pergunta.objects.get(id=pergunta_id)
                 pergunta.enunciado = enunciado_pergunta
                 pergunta.save()
 
-                # Atualiza as alternativas
-                for j in range(4):  # Supondo que sempre há 4 alternativas
+                for j in range(4):
                     alternativa_id = request.POST.get(f"alternativa_id_{i}_{j}")
                     enunciado_alternativa = request.POST.get(f"alternativa_{i}_{j}")
 
-                    # Se a alternativa já existe
                     if alternativa_id:
                         alternativa = Alternativa.objects.get(id=alternativa_id)
-                        if (
-                            enunciado_alternativa
-                        ):  # Verifica se o enunciado não está vazio
+                        if enunciado_alternativa:
                             alternativa.enunciado = enunciado_alternativa
                             alternativa.save()
-                    else:  # Se não houver ID, cria uma nova alternativa
-                        if (
-                            enunciado_alternativa
-                        ):  # Verifica se o enunciado não está vazio
+                    else:
+                        if enunciado_alternativa:
                             alternativa = Alternativa.objects.create(
                                 enunciado=enunciado_alternativa
                             )
                             pergunta.alternativas.add(alternativa)
 
-                # Atualiza a alternativa correta
                 alternativa_correta_id = request.POST.get(f"correta_{i}")
                 if alternativa_correta_id:
                     alternativa_correta = Alternativa.objects.get(
@@ -190,9 +177,7 @@ def editar_questionario(request, questionario_id):
                     )
                     pergunta.alternativa_correta = alternativa_correta
                 else:
-                    pergunta.alternativa_correta = (
-                        None  # Se não foi selecionada, limpa a correta
-                    )
+                    pergunta.alternativa_correta = None
                 pergunta.save()
 
             return redirect("gerenciar_questionarios")
@@ -226,7 +211,7 @@ def cadastro(request):
         user = User.objects.create_user(username=username, email=email, password=senha)
         user.save()
 
-        return HttpResponse("Usuário cadastrado com sucesso")
+        return HttpResponseRedirect(reverse("login"))
 
 
 def login(request):
@@ -316,10 +301,8 @@ def realizar_questionario(request, questionario_id):
                 if resposta == pergunta.alternativa_correta:
                     corretas += 1
 
-        # Calcular a pontuação
         pontuacao = (corretas / total) * 100 if total > 0 else 0
 
-        # Retornar uma resposta com os resultados
         return render(
             request,
             "resultado_questionario.html",
@@ -359,6 +342,6 @@ def contato(request):
                 request, "Erro ao enviar a mensagem. Tente novamente mais tarde."
             )
 
-        return redirect("contato")  # Redireciona após o envio
+        return redirect("contato")
 
     return render(request, "contato.html")
