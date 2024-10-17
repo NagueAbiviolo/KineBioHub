@@ -1,71 +1,79 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Adicionar Conteúdo</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 20px;
+      }
 
-        /* Estilos para o formulário */
-        form {
-            display: flex;
-            flex-direction: column;
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+      form {
+        display: flex;
+        flex-direction: column;
+        max-width: 400px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
 
-        /* Estilo para o input de texto e select */
-        input[type="text"], select, input[type="file"] {
-            padding: 12px;
-            margin-bottom: 15px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            width: 100%;
-            box-sizing: border-box;
-        }
+      input[type="text"],
+      select,
+      input[type="file"] {
+        padding: 12px;
+        margin-bottom: 15px;
+        font-size: 16px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        width: 100%;
+        box-sizing: border-box;
+      }
 
-        /* Estilo para o botão de submit */
-        input[type="submit"] {
-            padding: 12px;
-            font-size: 18px;
-            background-color: #4caf50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
+      input[type="submit"] {
+        padding: 12px;
+        font-size: 18px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
 
-        input[type="submit"]:hover {
-            background-color: #45a049;
-        }
+      input[type="submit"]:hover {
+        background-color: #45a049;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     {% if user.is_staff %}
-    <form action="{% url 'add_conteudo' %}" method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <select name="disciplina" required>
-            {% for disciplina in disciplinas %}
-            <option value="{{ disciplina.id }}">{{ disciplina.nome }}</option>
-            {% endfor %}
-        </select>
-        <input type="text" placeholder="Título" name="titulo" required />
-        <input type="text" placeholder="Descrição do Conteúdo" name="descricao" required />
-        <input type="file" name="imagens" />
-        <input type="submit" value="Entrar" />
+    <form
+      action="{% url 'add_conteudo' %}"
+      method="POST"
+      enctype="multipart/form-data"
+    >
+      {% csrf_token %}
+      <select name="disciplina" required>
+        {% for disciplina in disciplinas %}
+        <option value="{{ disciplina.id }}">{{ disciplina.nome }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" placeholder="Título" name="titulo" required />
+      <input
+        type="text"
+        placeholder="Descrição do Conteúdo"
+        name="descricao"
+        required
+      />
+      <input type="file" name="imagens" />
+      <input type="submit" value="Entrar" />
     </form>
     {% endif %}
-</body>
+  </body>
 </html>
