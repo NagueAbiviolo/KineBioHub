@@ -78,15 +78,16 @@
 
       <h2>Questionários Disponíveis</h2>
       <ul class="questionario-list">
-        {% if conteudo.questionario_set.all %} {% for questionario in
-        conteudo.questionario_set.all %}
+        {% if conteudo.questionario_set.all %} 
+        {% for questionario in conteudo.questionario_set.all %}
         <li class="questionario-item">
           <h3>{{ questionario.nome }}</h3>
           <a href="{% url 'realizar_questionario' questionario.id %}"
             >Realizar Questionário</a
           >
         </li>
-        {% endfor %} {% else %}
+        {% endfor %} 
+        {% else %}
         <p>Nenhum questionário disponível para este conteúdo.</p>
         {% endif %}
       </ul>
