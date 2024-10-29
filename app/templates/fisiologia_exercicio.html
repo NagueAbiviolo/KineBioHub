@@ -78,6 +78,7 @@
       {% for conteudo in conteudos %}
       <li>
         <h2>{{ conteudo.titulo }}</h2>
+        <a href="{% url 'detalhe_conteudo' conteudo.id %}">Ver Questionários</a>
       </li>
       {% endfor %}
     </ul>
